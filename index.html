@@ -28,6 +28,16 @@
 </style>
 </head>
 <body>
+<script>
+// When the site inside the frame reports it is ready, tell it how long that took since this address was opened
+// (shown to administrators only, as "Total" in the load-time badge). Only answers the Google page that runs the site.
+addEventListener('message', function (e) {
+  if (!e.data || e.data.kb !== 'ready' || window.__kbSent) return;
+  try { if (!/\.googleusercontent\.com$/.test(new URL(e.origin).hostname)) return; } catch (x) { return; }
+  window.__kbSent = 1;
+  e.source.postMessage({ kb: 'total', ms: Math.round(performance.now()) }, e.origin);
+});
+</script>
 <div id="wait">Loading K-BIGHEART…</div>
 <iframe id="app" title="K-BIGHEART Laboratory Homepage"
         src="https://script.google.com/macros/s/AKfycbyGtLbvLi6qESDvkiVh0cAyAzClw0_IH_k78vqH0R1ceYbyzve7ASE0KqJjn0MXiuxE/exec"
