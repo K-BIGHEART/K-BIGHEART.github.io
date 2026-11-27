@@ -375,6 +375,11 @@ const IMGS={"fp":"https://drive.google.com/thumbnail?id=1ytORYG_P7YNFWCz3Ff_eZYR
 const AFFS=["Prof. Chulhong Kim's Lab","Prof. Jin-Tae Kim's Lab","Prof. Hyung Ham Kim's Lab","Prof. Jeong Wook Lee's Lab","Prof. Gyoo Yeol Jung's Lab","Prof. Sei Kwang Hahn's Lab","Prof. Changhyeon Ryu's Lab","Prof. Jinah Jang's Lab","Prof. Sung-Min Park's Lab","Prof. Ara Koh's Lab","Prof. Dohoung Kim's Lab","Prof. Dong Sung Kim's Lab","Prof. Ki Hean Kim's Lab","Prof. Daeshik Kang's Lab","Prof. Dong Soo Lee's Lab","Prof. Yong Song Gho's Lab","Prof. Yong Joo Ahn's Lab","Prof. Yun Ha Hur's Lab","Prof. Sekyu Choi's Lab","Prof. Minsik Lee's Lab","Prof. Jongshin Kim's Lab","Prof. Jaesung Park's Lab","Prof. Hyung Joon Cha's Lab","Prof. Young-Tae Chang's Lab","Prof. Seung Hwan Cho's Lab","Prof. Hyung Min Chi's Lab","Prof. Jiwon Jang's Lab","Prof. Sunyoung Shin's Lab","Prof. Won Jong Kim's Lab","Prof. Sungjee Kim's Lab","Prof. Sungchul Kim's Lab","Prof. Junsuk Rho's Lab","Prof. Kyoung-Duck Park's Lab","Prof. Jongcheol Seo's Lab","Prof. Jeong-Soo Lee's Lab","Prof. Jong-Bong Lee's Lab","Prof. Jiwon Lee's Lab","Core-Tiger Team (Thrust 1)","Core-Tiger Team (Thrust 2)","Core-Tiger Team (Thrust 3)","Core-Tiger Team (Thrust 4)","Core-Tiger Team (Thrust 5)","Administrative Team"];
 const TESTSITE=true===true;
 const EXEC_URL="https://script.google.com/macros/s/AKfycbz4U3RyT_EOvEn6k_p8igx22kyeZANgnKRF3-kq7BcbLaN0dWBPPtc3Kz_xXWmLkIqk/exec";
+/* storage names: the test pages use their own, because test and live pages can share the address k-bigheart.github.io */
+const SK=TESTSITE?'test_':'';
+/* tell the k-bigheart.github.io page around this site the log-in token, so a page served from GitHub there later finds it
+   (people then do not have to log in again when the site moves to GitHub Pages). Sent only to that address. */
+function tokShare(){try{if(window.top!==window)window.top.postMessage({kb:'tok',t:TOKEN||'',test:TESTSITE},'https:\/\/k-bigheart.github.io')}catch(e){}}
 const PERF={code:performance.now()};
 (function(){var i=document.querySelector('header h1 img');if(i&&IMGS.logo)i.src=IMGS.logo})();
 const $=s=>document.querySelector(s),cls={'Available':'ok','Maintenance':'warn','Out of service':'bad'},W=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -386,11 +391,11 @@ const norm=n=>String(n||'').trim().replace(/\s+/g,' ');
 const typing=()=>{const t=document.activeElement;return !!t&&(t.tagName=='INPUT'||t.tagName=='TEXTAREA')};
 /* served by Google: google.script.run; served from GitHub Pages: POST to the web app (doPost), same functions and answers */
 const API=(fn,...a)=>window.google&&google.script&&google.script.run?new Promise((ok,no)=>google.script.run.withSuccessHandler(ok).withFailureHandler(no)[fn](...a)):fetch(EXEC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn,args:a})}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()});
-const setTok=t=>{TOKEN=t||'';try{if(t){localStorage.setItem('labtok',t)}else{localStorage.removeItem('labtok');localStorage.removeItem('labstate')}}catch(e){}};
+const setTok=t=>{TOKEN=t||'';try{if(t){localStorage.setItem(SK+'labtok',t)}else{localStorage.removeItem(SK+'labtok');localStorage.removeItem(SK+'labstate')}}catch(e){}tokShare()};
 let saveT=0;
-function saveState(r){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem('labstate',JSON.stringify(r))}catch(e){}},300)}
-function loadSaved(){try{const c=JSON.parse(localStorage.getItem('labstate')||'null');return c&&c.me?c:null}catch(e){return null}}
-function dropSaved(){try{localStorage.removeItem('labstate')}catch(e){}}
+function saveState(r){clearTimeout(saveT);saveT=setTimeout(function(){try{localStorage.setItem(SK+'labstate',JSON.stringify(r))}catch(e){}},300)}
+function loadSaved(){try{const c=JSON.parse(localStorage.getItem(SK+'labstate')||'null');return c&&c.me?c:null}catch(e){return null}}
+function dropSaved(){try{localStorage.removeItem(SK+'labstate')}catch(e){}}
 function resetData(){INV={items:[],stock:[]};EV=[];myGc='';GCN=0;st.gcs=st.gce=false;EQ=[];RS=[];ALLR=[];INQ=[];USERS=[];VER='';CUT='';PASTLOAD=0}
 /* saves shown at once (booking, cancel): PEND = bookings not yet confirmed by the server, PDEL = cancellations not yet confirmed.
    They are kept on screen when page data arrives; on an error they are undone and the message says why. */
@@ -918,7 +923,7 @@ document.addEventListener('click',ev=>{document.querySelectorAll('details.rowm[o
 document.addEventListener('toggle',ev=>{const d=ev.target;if(!d.matches||!d.matches('details.rowm')||!d.open)return;const r=d.querySelector('summary').getBoundingClientRect(),m=d.querySelector('.rmd');m.style.top=(r.bottom+4)+'px';m.style.left=Math.max(8,r.right-m.offsetWidth)+'px';const mb=m.getBoundingClientRect();if(mb.bottom>innerHeight-8)m.style.top=Math.max(8,r.top-4-mb.height)+'px'},true);
 addEventListener('scroll',()=>document.querySelectorAll('details.rowm[open]').forEach(d=>d.removeAttribute('open')),true);
 if(TESTSITE){const x=document.getElementById('tsb');if(x)x.style.display='';document.title='[TEST] '+document.title}
-async function init(){let fast=false;try{TOKEN=localStorage.getItem('labtok')||''}catch(e){}
+async function init(){let fast=false;try{TOKEN=localStorage.getItem(SK+'labtok')||''}catch(e){}tokShare();
 if(TOKEN){const c=loadSaved();if(c){try{applyS(c);ld.a=1;render();fast=true;PERF.cache=performance.now()}catch(e){dropSaved();fast=false;ld.a=0;VER=''}}}
 try{if(TOKEN){const a=performance.now(),r=await call('getState',fast?VER:'');PERF.data=performance.now()-a;PERF.srv=r&&r.srv;PERF.same=!!(r&&r.same)}}catch(x){if(!fast)err='Could not load. Please refresh the page.'}
 ld.a=1;PERF.ready=performance.now();if(window.top===window)PERF.total=PERF.ready;setTimeout(perfShow,0);try{window.top.postMessage({kb:'ready'},'*')}catch(e){}if(fast&&(typing()||st.modal||busy))return;try{render()}catch(e){dropSaved();err='Could not show the page. Please refresh.';$('#main').textContent=err}}
