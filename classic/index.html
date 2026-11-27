@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-BIGHEART Laboratory Homepage</title>
+<!-- internal site for K-BIGHEART project members: keep it out of search engines and link previews -->
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="googlebot" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0b2a5b">
+<!-- open the connections to Google early, so the site inside the frame starts loading sooner -->
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
+<link rel="preconnect" href="https://n-script.googleusercontent.com" crossorigin>
+<link rel="dns-prefetch" href="https://drive.google.com">
+<style>
+  :root { color-scheme: light; }
+  html, body { margin: 0; height: 100%; background: #f4f6fa; overflow: hidden; }
+  /* The whole site runs inside this frame (Google Apps Script web app). Shown here, Google's
+     "created by a Google Apps Script user" banner does not appear. */
+  #app { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; border: 0; display: block; }
+  #wait { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+          font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; color: #55607a; pointer-events: none; }
+  #wait.gone { display: none; }
+  .fallback { position: fixed; left: 16px; right: 16px; bottom: 16px; text-align: center; font: 13px system-ui, sans-serif; }
+  .fallback a { color: #0b2a5b; }
+</style>
+</head>
+<body>
+<script>
+// When the site inside the frame reports it is ready, tell it how long that took since this address was opened
+// (shown to administrators only, as "Total" in the load-time badge). Only answers the Google page that runs the site.
+addEventListener('message', function (e) {
+  if (!e.data || e.data.kb !== 'ready' || window.__kbSent) return;
+  try { if (!/\.googleusercontent\.com$/.test(new URL(e.origin).hostname)) return; } catch (x) { return; }
+  window.__kbSent = 1;
+  e.source.postMessage({ kb: 'total', ms: Math.round(performance.now()) }, e.origin);
+});
+</script>
+<script>
+// Log-in hand-over (before the switch to the GitHub Pages version): the site inside the frame sends its log-in token here,
+// and it is kept in this address's storage, where the GitHub Pages version of the site will look for it. Only from the Google page.
+addEventListener('message', function (e) {
+  var d = e.data; if (!d || d.kb !== 'tok') return;
+  try { if (!/\.googleusercontent\.com$/.test(new URL(e.origin).hostname)) return; } catch (x) { return; }
+  var k = (d.test ? 'test_' : '') + 'labtok';
+  try { if (d.t) localStorage.setItem(k, String(d.t)); else localStorage.removeItem(k); } catch (x) {}
+});
+</script>
+<div id="wait">Loading K-BIGHEART…</div>
+<iframe id="app" title="K-BIGHEART Laboratory Homepage"
+        src="https://script.google.com/macros/s/AKfycbyGtLbvLi6qESDvkiVh0cAyAzClw0_IH_k78vqH0R1ceYbyzve7ASE0KqJjn0MXiuxE/exec"
+        allow="clipboard-write; fullscreen"
+        onload="document.getElementById('wait').className='gone'"></iframe>
+<noscript><p class="fallback"><a href="https://script.google.com/macros/s/AKfycbyGtLbvLi6qESDvkiVh0cAyAzClw0_IH_k78vqH0R1ceYbyzve7ASE0KqJjn0MXiuxE/exec">Open the homepage</a></p></noscript>
+</body>
+</html>

@@ -38,6 +38,16 @@ addEventListener('message', function (e) {
   e.source.postMessage({ kb: 'total', ms: Math.round(performance.now()) }, e.origin);
 });
 </script>
+<script>
+// Log-in hand-over (before the switch to the GitHub Pages version): the site inside the frame sends its log-in token here,
+// and it is kept in this address's storage, where the GitHub Pages version of the site will look for it. Only from the Google page.
+addEventListener('message', function (e) {
+  var d = e.data; if (!d || d.kb !== 'tok') return;
+  try { if (!/\.googleusercontent\.com$/.test(new URL(e.origin).hostname)) return; } catch (x) { return; }
+  var k = (d.test ? 'test_' : '') + 'labtok';
+  try { if (d.t) localStorage.setItem(k, String(d.t)); else localStorage.removeItem(k); } catch (x) {}
+});
+</script>
 <div id="wait">Loading K-BIGHEART…</div>
 <iframe id="app" title="K-BIGHEART Laboratory Homepage"
         src="https://script.google.com/macros/s/AKfycbyGtLbvLi6qESDvkiVh0cAyAzClw0_IH_k78vqH0R1ceYbyzve7ASE0KqJjn0MXiuxE/exec"
